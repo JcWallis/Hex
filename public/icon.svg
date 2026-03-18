@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="80" fill="#030712"/>
+  <polygon points="256,80 420,172 420,340 256,432 92,340 92,172" fill="#4f46e5"/>
+  <text x="256" y="300" font-family="system-ui,sans-serif" font-size="180" font-weight="bold" fill="white" text-anchor="middle">H</text>
+</svg>
