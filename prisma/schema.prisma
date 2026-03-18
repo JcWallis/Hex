@@ -17,6 +17,7 @@ model WorkItem {
   metadata    Json?
   aiSummary   String?        @db.Text
   aiNextSteps String?        @db.Text
+  sessionId   String         @default("")
 
   tasks     Task[]
   notes     Note[]
@@ -25,6 +26,7 @@ model WorkItem {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([sessionId])
   @@map("work_items")
 }
 
@@ -37,6 +39,7 @@ model Task {
   dueDate     DateTime?
   tags        String[]  @default([])
   aiHint      String?   @db.Text
+  sessionId   String    @default("")
 
   workItemId String?
   workItem   WorkItem? @relation(fields: [workItemId], references: [id], onDelete: SetNull)
@@ -44,14 +47,16 @@ model Task {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([sessionId])
   @@map("tasks")
 }
 
 model Note {
-  id      String   @id @default(cuid())
-  title   String
-  content String   @db.Text
-  tags    String[] @default([])
+  id        String   @id @default(cuid())
+  title     String
+  content   String   @db.Text
+  tags      String[] @default([])
+  sessionId String   @default("")
 
   workItemId String?
   workItem   WorkItem? @relation(fields: [workItemId], references: [id], onDelete: SetNull)
@@ -59,6 +64,7 @@ model Note {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([sessionId])
   @@map("notes")
 }
 
@@ -70,6 +76,7 @@ model Document {
   fileType    String
   fileSize    Int
   tags        String[] @default([])
+  sessionId   String   @default("")
 
   workItemId String?
   workItem   WorkItem? @relation(fields: [workItemId], references: [id], onDelete: SetNull)
@@ -77,6 +84,7 @@ model Document {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([sessionId])
   @@map("documents")
 }
 

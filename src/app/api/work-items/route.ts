@@ -2,15 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createWorkItemSchema } from "@/lib/validators/work-item";
 
-
 export async function GET(req: NextRequest) {
-
+  const sessionId = req.headers.get("x-session-id") ?? "";
   const { searchParams } = new URL(req.url);
   const status = searchParams.get("status");
   const type = searchParams.get("type");
 
   const workItems = await prisma.workItem.findMany({
     where: {
+      sessionId,
       ...(status ? { status: status as never } : {}),
       ...(type ? { type: type as never } : {}),
     },
@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-
+  const sessionId = req.headers.get("x-session-id") ?? "";
   const body = await req.json();
   const parsed = createWorkItemSchema.safeParse(body);
   if (!parsed.success) {
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
 
   const { metadata, ...rest } = parsed.data;
   const workItem = await prisma.workItem.create({
-    data: { ...rest, ...(metadata ? { metadata: metadata as never } : {}) },
+    data: { ...rest, sessionId, ...(metadata ? { metadata: metadata as never } : {}) },
   });
   return NextResponse.json(workItem, { status: 201 });
 }

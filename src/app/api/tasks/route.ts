@@ -2,15 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createTaskSchema } from "@/lib/validators/task";
 
-
 export async function GET(req: NextRequest) {
-
+  const sessionId = req.headers.get("x-session-id") ?? "";
   const { searchParams } = new URL(req.url);
   const workItemId = searchParams.get("workItemId");
   const completed = searchParams.get("completed");
 
   const tasks = await prisma.task.findMany({
     where: {
+      sessionId,
       ...(workItemId ? { workItemId } : {}),
       ...(completed !== null ? { completed: completed === "true" } : {}),
     },
@@ -22,13 +22,13 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-
+  const sessionId = req.headers.get("x-session-id") ?? "";
   const body = await req.json();
   const parsed = createTaskSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const task = await prisma.task.create({ data: parsed.data });
+  const task = await prisma.task.create({ data: { ...parsed.data, sessionId } });
   return NextResponse.json(task, { status: 201 });
 }

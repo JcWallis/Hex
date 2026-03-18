@@ -2,12 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { updateWorkItemSchema } from "@/lib/validators/work-item";
 
-
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-
+  const sessionId = req.headers.get("x-session-id") ?? "";
   const { id } = await params;
   const workItem = await prisma.workItem.findUnique({
-    where: { id },
+    where: { id, sessionId },
     include: {
       tasks: { orderBy: { createdAt: "desc" } },
       notes: { orderBy: { updatedAt: "desc" } },
@@ -20,7 +19,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-
+  const sessionId = req.headers.get("x-session-id") ?? "";
   const { id } = await params;
   const body = await req.json();
   const parsed = updateWorkItemSchema.safeParse(body);
@@ -30,15 +29,15 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   const { metadata, ...rest } = parsed.data;
   const workItem = await prisma.workItem.update({
-    where: { id },
+    where: { id, sessionId },
     data: { ...rest, ...(metadata ? { metadata: metadata as never } : {}) },
   });
   return NextResponse.json(workItem);
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-
+  const sessionId = req.headers.get("x-session-id") ?? "";
   const { id } = await params;
-  await prisma.workItem.delete({ where: { id } });
+  await prisma.workItem.delete({ where: { id, sessionId } });
   return new NextResponse(null, { status: 204 });
 }

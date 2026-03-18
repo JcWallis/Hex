@@ -2,14 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createDocumentSchema } from "@/lib/validators/document";
 
-
 export async function GET(req: NextRequest) {
-
+  const sessionId = req.headers.get("x-session-id") ?? "";
   const { searchParams } = new URL(req.url);
   const workItemId = searchParams.get("workItemId");
 
   const documents = await prisma.document.findMany({
-    where: workItemId ? { workItemId } : {},
+    where: { sessionId, ...(workItemId ? { workItemId } : {}) },
     include: { workItem: { select: { id: true, title: true } } },
     orderBy: { createdAt: "desc" },
   });
@@ -18,13 +17,13 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-
+  const sessionId = req.headers.get("x-session-id") ?? "";
   const body = await req.json();
   const parsed = createDocumentSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const document = await prisma.document.create({ data: parsed.data });
+  const document = await prisma.document.create({ data: { ...parsed.data, sessionId } });
   return NextResponse.json(document, { status: 201 });
 }

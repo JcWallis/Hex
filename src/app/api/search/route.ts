@@ -1,19 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-
 export async function GET(req: NextRequest) {
-
+  const sessionId = req.headers.get("x-session-id") ?? "";
   const { searchParams } = new URL(req.url);
   const q = searchParams.get("q")?.trim();
 
   if (!q || q.length < 2) return NextResponse.json([]);
 
-  const lower = `%${q.toLowerCase()}%`;
-
   const [workItems, tasks, notes, documents] = await Promise.all([
     prisma.workItem.findMany({
       where: {
+        sessionId,
         OR: [
           { title: { contains: q, mode: "insensitive" } },
           { description: { contains: q, mode: "insensitive" } },
@@ -25,6 +23,7 @@ export async function GET(req: NextRequest) {
     }),
     prisma.task.findMany({
       where: {
+        sessionId,
         OR: [
           { title: { contains: q, mode: "insensitive" } },
           { description: { contains: q, mode: "insensitive" } },
@@ -35,6 +34,7 @@ export async function GET(req: NextRequest) {
     }),
     prisma.note.findMany({
       where: {
+        sessionId,
         OR: [
           { title: { contains: q, mode: "insensitive" } },
           { content: { contains: q, mode: "insensitive" } },
@@ -45,6 +45,7 @@ export async function GET(req: NextRequest) {
     }),
     prisma.document.findMany({
       where: {
+        sessionId,
         OR: [
           { title: { contains: q, mode: "insensitive" } },
           { description: { contains: q, mode: "insensitive" } },
@@ -62,6 +63,5 @@ export async function GET(req: NextRequest) {
     ...documents.map((i) => ({ ...i, entityType: "document" as const })),
   ].sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
 
-  void lower; // suppress unused warning
   return NextResponse.json(results);
 }
