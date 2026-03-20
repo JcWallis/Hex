@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { randomUUID } from "crypto";
 
 export function middleware(request: NextRequest) {
   let sid = request.cookies.get("sid")?.value;
   const isNew = !sid;
-  if (!sid) sid = randomUUID();
+  if (!sid) sid = crypto.randomUUID();
 
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-session-id", sid);
