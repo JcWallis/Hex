@@ -2,7 +2,6 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import TaskList from "@/components/tasks/TaskList";
-import AISuggestions from "@/components/ai/AISuggestions";
 
 export default async function WorkItemDetailPage({
   params,
@@ -84,9 +83,9 @@ export default async function WorkItemDetailPage({
         </Link>
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="space-y-6">
         {/* Tasks */}
-        <div className="col-span-2 space-y-6">
+        <div className="space-y-6">
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-semibold text-white">Tasks</h2>
@@ -146,14 +145,6 @@ export default async function WorkItemDetailPage({
           )}
         </div>
 
-        {/* AI Panel */}
-        <div className="space-y-4">
-          <AISuggestions
-            entityType="work_item"
-            entityId={item.id}
-            cachedSuggestions={item.aiNextSteps}
-          />
-        </div>
       </div>
     </div>
   );
